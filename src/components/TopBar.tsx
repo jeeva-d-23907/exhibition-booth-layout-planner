@@ -58,7 +58,8 @@ export const TopBar: React.FC<TopBarProps> = ({ stageRef }) => {
       pdf.addImage(dataUrl, 'PNG', 5, 5, pdfWidth - 10, pdfHeight - 10);
       pdf.save('exhibition-layout.pdf');
       toast.success('PDF exported!', { id: 'pdf' });
-    } catch {
+    } catch (err) {
+      console.error('PDF export failed:', err);
       toast.error('PDF export failed', { id: 'pdf' });
     }
   };
@@ -169,7 +170,7 @@ export const TopBar: React.FC<TopBarProps> = ({ stageRef }) => {
       {selectedElement?.kind === 'booth' && (
         <button
           className={btn}
-          onClick={() => duplicateBooth((selectedElement as { kind: 'booth'; id: string }).id)}
+          onClick={() => duplicateBooth(selectedElement.id)}
           title="Duplicate selected (Ctrl+D)"
         >
           <Copy size={13} />

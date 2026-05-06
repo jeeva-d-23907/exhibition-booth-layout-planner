@@ -100,24 +100,26 @@ export const PropertiesPanel: React.FC = () => {
       setNotes(selectedBooth.company?.notes || '');
       setPrice(selectedBooth.price?.toString() || '');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedBooth?.id]);
+    // Intentionally depend only on the ID: we re-init local state when a
+    // *different* booth is selected, but not when its properties change mid-edit
+    // (that would discard the user's in-progress text).
+  }, [selectedBooth?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync local state when selected path changes
   useEffect(() => {
     if (selectedPath) {
       setPathLabel(selectedPath.label || '');
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedPath?.id]);
+    // Same rationale: re-init only when the selected path ID changes.
+  }, [selectedPath?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Sync local state when selected object changes
   useEffect(() => {
     if (selectedObject) {
       setObjectLabel(selectedObject.label);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedObject?.id]);
+    // Same rationale: re-init only when the selected object ID changes.
+  }, [selectedObject?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── Helpers ───────────────────────────────────────────────────────────────
 
