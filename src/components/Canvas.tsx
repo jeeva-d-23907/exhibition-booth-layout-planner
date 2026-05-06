@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect, useCallback } from 'react';
 import {
-  Stage, Layer, Rect, Text, Line, Arrow, Group, Transformer
+  Stage, Layer, Rect, Text, Line, Arrow, Group, Transformer, Circle
 } from 'react-konva';
 import Konva from 'konva';
 import { useStore } from '../store/useStore';
@@ -66,6 +66,13 @@ export const Canvas: React.FC<CanvasProps> = ({ stageRef, onMouseMove }) => {
     ro.observe(containerRef.current);
     return () => ro.disconnect();
   }, []);
+
+  // Clear path points when tool changes away from 'path'
+  useEffect(() => {
+    if (tool !== 'path') {
+      setPathPoints([]);
+    }
+  }, [tool]);
 
   // Transformer
   useEffect(() => {
@@ -219,17 +226,23 @@ export const Canvas: React.FC<CanvasProps> = ({ stageRef, onMouseMove }) => {
   };
 
   const handleDblClick = () => {
-    if (tool === 'path' && pathPoints.length >= 4) {
-      const newPath: WalkPath = {
-        id: crypto.randomUUID(),
-        points: pathPoints,
-        style: currentPathStyle,
-        strokeWidth: currentPathWidth,
-        color: PATH_COLORS[currentPathStyle],
-        arrowEnd: true,
-        locked: false,
-      };
-      addPath(newPath);
+    if (tool === 'path') {
+      // A double-click fires two mousedown events before the dblclick event,
+      // so pathPoints has one extra point from the second mousedown.
+      // Remove the last 2 numbers (one x,y pair) to get the intended points.
+      const finalPoints = pathPoints.slice(0, -2);
+      if (finalPoints.length >= 4) {
+        const newPath: WalkPath = {
+          id: crypto.randomUUID(),
+          points: finalPoints,
+          style: currentPathStyle,
+          strokeWidth: currentPathWidth,
+          color: PATH_COLORS[currentPathStyle],
+          arrowEnd: true,
+          locked: false,
+        };
+        addPath(newPath);
+      }
       setPathPoints([]);
       setTool('select');
     }
@@ -276,7 +289,21 @@ export const Canvas: React.FC<CanvasProps> = ({ stageRef, onMouseMove }) => {
   };
 
   return (
-    <div ref={containerRef} className={`flex-1 overflow-hidden ${darkMode ? 'bg-gray-900' : 'bg-gray-100'}`} style={{ position: 'relative' }}>
+    <div
+      ref={containerRef}
+      className={`flex-1 overflow-hidden relative ${darkMode ? 'bg-gray-900' : 'bg-slate-100'}`}
+    >
+      {/* Drawing mode banner */}
+      {tool === 'path' && (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 z-10 pointer-events-none">
+          <div className="flex items-center gap-2 bg-indigo-600 text-white text-xs font-medium px-4 py-2 rounded-full shadow-lg shadow-indigo-600/40">
+            <span className="w-2 h-2 rounded-full bg-white animate-pulse" />
+            <span>Click to add points</span>
+            <span className="opacity-50">·</span>
+            <span>Double-click or <kbd className="bg-indigo-500 px-1.5 py-0.5 rounded text-[10px] font-bold">Esc</kbd> to finish</span>
+          </div>
+        </div>
+      )}
       <Stage
         ref={stageRef as React.RefObject<Konva.Stage>}
         width={size.width}
@@ -344,8 +371,8 @@ export const Canvas: React.FC<CanvasProps> = ({ stageRef, onMouseMove }) => {
             </React.Fragment>
           ))}
 
-          {/* Path drawing preview */}
-          {pathPoints.length >= 2 && (
+          {/* Path drawing preview – only visible while in path tool */}
+          {tool === 'path' && pathPoints.length >= 2 && (
             <Line
               points={[...pathPoints, cursorPos.x, cursorPos.y]}
               stroke={PATH_COLORS[currentPathStyle]}
@@ -354,6 +381,22 @@ export const Canvas: React.FC<CanvasProps> = ({ stageRef, onMouseMove }) => {
               listening={false}
               opacity={0.6}
             />
+          )}
+          {/* Dot markers for each added path point */}
+          {tool === 'path' && pathPoints.length >= 2 && (
+            Array.from({ length: pathPoints.length / 2 }, (_, i) => (
+              <Circle
+                key={i}
+                x={pathPoints[i * 2]}
+                y={pathPoints[i * 2 + 1]}
+                radius={4}
+                fill={PATH_COLORS[currentPathStyle]}
+                stroke="#fff"
+                strokeWidth={1.5}
+                listening={false}
+                opacity={0.9}
+              />
+            ))
           )}
         </Layer>
 
