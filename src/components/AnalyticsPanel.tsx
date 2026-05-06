@@ -1,14 +1,11 @@
 import React from 'react';
 import { X, TrendingUp, DollarSign, Package } from 'lucide-react';
-import { useStore } from '../store/useStore';
+import { useStore, Analytics } from '../store/useStore';
 
 export const AnalyticsPanel: React.FC = () => {
   const darkMode = useStore(s => s.darkMode);
   const toggleAnalytics = useStore(s => s.toggleAnalytics);
-  const analytics = useStore(s => s.getAnalytics()) as {
-    total: number; available: number; reserved: number; sold: number;
-    revenue: number; potential: number; categories: Record<string, number>;
-  };
+  const analytics = useStore(s => s.getAnalytics()) as Analytics;
 
   const panelClass = `absolute top-16 right-80 w-72 rounded-2xl shadow-2xl border z-50 overflow-hidden ${
     darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900'

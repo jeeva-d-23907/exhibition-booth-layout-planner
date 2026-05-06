@@ -1,7 +1,8 @@
 import React from 'react';
 import { Trash2, Copy, Lock, Unlock, TrendingUp } from 'lucide-react';
 import { useStore } from '../store/useStore';
-import { BoothStatus } from '../types';
+import { Analytics } from '../store/useStore';
+import { BoothStatus, Company } from '../types';
 
 const STATUS_COLORS: Record<BoothStatus, string> = {
   available: '#22c55e',
@@ -23,9 +24,7 @@ export const PropertiesPanel: React.FC = () => {
   const updateObject = useStore(s => s.updateObject);
   const deleteObject = useStore(s => s.deleteObject);
 
-  const analytics = useStore(s => s.getAnalytics()) as {
-    total: number; available: number; reserved: number; sold: number; revenue: number; potential: number; categories: Record<string, number>;
-  };
+  const analytics = useStore(s => s.getAnalytics()) as Analytics;
 
   const panelClass = `w-72 border-l overflow-y-auto ${darkMode ? 'bg-gray-800 border-gray-700 text-gray-100' : 'bg-white border-gray-200 text-gray-900'}`;
   const labelClass = `text-xs font-semibold mb-1 ${darkMode ? 'text-gray-400' : 'text-gray-500'}`;
@@ -50,6 +49,20 @@ export const PropertiesPanel: React.FC = () => {
       {children}
     </div>
   );
+
+  const updateCompanyField = (field: keyof Company, value: string) => {
+    if (!selectedBooth) return;
+    updateBooth(selectedBooth.id, {
+      company: {
+        name: selectedBooth.company?.name || '',
+        contactPerson: selectedBooth.company?.contactPerson || '',
+        category: selectedBooth.company?.category || '',
+        notes: selectedBooth.company?.notes || '',
+        ...selectedBooth.company,
+        [field]: value,
+      },
+    });
+  };
 
   if (selectedBooth) {
     return (
@@ -134,7 +147,7 @@ export const PropertiesPanel: React.FC = () => {
                 className={inputClass}
                 value={selectedBooth.company?.name || ''}
                 placeholder="Enter company name"
-                onChange={e => updateBooth(selectedBooth.id, { company: { ...selectedBooth.company, name: e.target.value, contactPerson: selectedBooth.company?.contactPerson || '', category: selectedBooth.company?.category || '', notes: selectedBooth.company?.notes || '' } })}
+                onChange={e => updateCompanyField('name', e.target.value)}
               />
             </Field>
             <Field label="Contact Person">
@@ -142,7 +155,7 @@ export const PropertiesPanel: React.FC = () => {
                 className={inputClass}
                 value={selectedBooth.company?.contactPerson || ''}
                 placeholder="Contact person"
-                onChange={e => updateBooth(selectedBooth.id, { company: { ...selectedBooth.company, name: selectedBooth.company?.name || '', contactPerson: e.target.value, category: selectedBooth.company?.category || '', notes: selectedBooth.company?.notes || '' } })}
+                onChange={e => updateCompanyField('contactPerson', e.target.value)}
               />
             </Field>
             <Field label="Category">
@@ -150,7 +163,7 @@ export const PropertiesPanel: React.FC = () => {
                 className={inputClass}
                 value={selectedBooth.company?.category || ''}
                 placeholder="e.g. Technology, Food, Fashion"
-                onChange={e => updateBooth(selectedBooth.id, { company: { ...selectedBooth.company, name: selectedBooth.company?.name || '', contactPerson: selectedBooth.company?.contactPerson || '', category: e.target.value, notes: selectedBooth.company?.notes || '' } })}
+                onChange={e => updateCompanyField('category', e.target.value)}
               />
             </Field>
             <Field label="Notes">
@@ -159,7 +172,7 @@ export const PropertiesPanel: React.FC = () => {
                 rows={3}
                 value={selectedBooth.company?.notes || ''}
                 placeholder="Additional notes..."
-                onChange={e => updateBooth(selectedBooth.id, { company: { ...selectedBooth.company, name: selectedBooth.company?.name || '', contactPerson: selectedBooth.company?.contactPerson || '', category: selectedBooth.company?.category || '', notes: e.target.value } })}
+                onChange={e => updateCompanyField('notes', e.target.value)}
               />
             </Field>
           </Section>

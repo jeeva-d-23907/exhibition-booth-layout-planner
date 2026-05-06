@@ -1,5 +1,5 @@
 import React from 'react';
-import { useStore } from '../store/useStore';
+import { useStore, Analytics } from '../store/useStore';
 
 interface BottomBarProps {
   mousePos: { x: number; y: number };
@@ -11,7 +11,7 @@ export const BottomBar: React.FC<BottomBarProps> = ({ mousePos }) => {
   const tool = useStore(s => s.tool);
   const gridSize = useStore(s => s.gridSize);
   const gridEnabled = useStore(s => s.gridEnabled);
-  const analytics = useStore(s => s.getAnalytics()) as { total: number; available: number; reserved: number; sold: number };
+  const analytics = useStore(s => s.getAnalytics()) as Analytics;
 
   const barClass = `h-7 flex items-center px-4 gap-4 text-xs border-t ${darkMode ? 'bg-gray-900 border-gray-700 text-gray-400' : 'bg-white border-gray-200 text-gray-500'}`;
 

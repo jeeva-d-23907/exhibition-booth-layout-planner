@@ -7,6 +7,16 @@ interface HistoryEntry {
   objects: LayoutObject[];
 }
 
+export interface Analytics {
+  total: number;
+  available: number;
+  reserved: number;
+  sold: number;
+  revenue: number;
+  potential: number;
+  categories: Record<string, number>;
+}
+
 interface State {
   booths: Booth[];
   paths: WalkPath[];
@@ -54,7 +64,7 @@ interface Actions {
   setFilterStatus: (s: string) => void;
   setFilterCategory: (c: string) => void;
   snapToGrid: (v: number) => number;
-  getAnalytics: () => object;
+  getAnalytics: () => Analytics;
   saveToLocalStorage: () => void;
   loadFromLocalStorage: () => void;
   resetCanvas: () => void;
